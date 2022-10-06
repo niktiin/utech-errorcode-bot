@@ -4,7 +4,7 @@ require_once('classes/ErrorRegistryClass.php');
 require_once('classes/RequestClass.php');
 require_once('classes/QueryHandlersRegistry.php');
 require_once('classes/MessageHandlersRegistry.php');
-require_once('classes/KeyboardRegistryClass.php');
+require_once('classes/MessageRegistryClass.php');
 $bot = new Bot();
 try {
     $bot->handleCallbackQuery(new Request);

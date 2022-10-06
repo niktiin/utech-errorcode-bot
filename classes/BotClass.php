@@ -1,6 +1,6 @@
 <?php
 class Bot {
-    private static $ver = '0.0.3';
+    private static $ver = '0.0.4';
     public $update;
     public $chatId;
     public $message;
@@ -27,10 +27,49 @@ class Bot {
             case 'route_testQuery':
                 $queryHandler->queryTest(new Request, $this->callbackQueryChatId);
                 break;
+            case 'route_getError':
+                $errorObject = MessageRegistryClass::getError($this->data->code);
+                if (!$errorObject) {
+                    $text = sprintf(MessageRegistryClass::$messages['errorDoNotExists']['text'], $this->data->code);
+                    $queryHandler->errorDoNotExists(new Request, $this->callbackQueryChatId, $text);
+                    die();
+                }
+                $keyboard = MessageRegistryClass::$messages['errorsArrayHideKeyboard']['keyboard'];
+                $messageId = intval($this->callbackQuery['message']['message_id']);
+                $text = MessageRegistryClass::$messages['errorsArrayHideKeyboard']['text'];
+                $queryHandler->errorsArrayEditMessage(new Request, $this->callbackQueryChatId, $messageId, $text, $keyboard);
+
+                $keyboard = MessageRegistryClass::getErrorKeyboard($this->data->code);
+                $text = sprintf(MessageRegistryClass::$messages['error']['text'], $this->data->code) . PHP_EOL . $errorObject['text'];
+                $queryHandler->errorHandler(new Request, $this->callbackQueryChatId, $text, $keyboard);
+                break;
+            case 'route_getSolutions':
+                $errorObject = MessageRegistryClass::getError($this->data->code);
+                $text = $errorObject['solutions'];
+                $queryHandler->getSolutionsHandler(new Request, $this->callbackQueryChatId, $text, $this->data->code);
+                break;
+            case 'route_getComponents':
+                $errorObject = MessageRegistryClass::getError($this->data->code);
+                $text = $errorObject['components'];
+                $queryHandler->getComponentsHandler(new Request, $this->callbackQueryChatId, $text, $this->data->code);
+                break;
+            case 'route_hideErrorsArray':
+                $keyboard = MessageRegistryClass::$messages['errorsArrayHideKeyboard']['keyboard'];
+                $messageId = intval($this->callbackQuery['message']['message_id']);
+                $text = MessageRegistryClass::$messages['errorsArrayHideKeyboard']['text'];
+                $queryHandler->errorsArrayEditMessage(new Request, $this->callbackQueryChatId, $messageId, $text, $keyboard);
+                break;
+            case 'route_showErrorsArray':
+                $messageId = intval($this->callbackQuery['message']['message_id']);
+                $keyboard = MessageRegistryClass::getErrorsArray()['keyboard'];
+                $text = MessageRegistryClass::getErrorsArray()['text'];
+                $queryHandler->errorsArrayEditMessage(new Request, $this->callbackQueryChatId, $messageId, $text, $keyboard);
+                break;
             default:
                 throw new Exception("Error route", 1);
                 break;
         }
+        $queryHandler->answerCallbackQuery(new Request, $this->callbackQuery['id']);
     }
     public function handleTextMessage($request) {
         if(!isset($this->chatId)) {
@@ -38,54 +77,40 @@ class Bot {
         }
         $queryHandler = new MessageHandlersRegistry;
         $route = mb_strtolower(explode(' ', $this->text)[0]);
+        $payload = mb_strtolower(explode(' ', $this->text)[1]);
         switch ($route) {
             case '/start':
-                $keyboard = KeyboardRegistryClass::$keyboards['basic']['keyboard'];
-                $description = KeyboardRegistryClass::$keyboards['basic']['description'];
-                $this->sendMessageWithKeyboard(new Request, $description, $keyboard);
+                $keyboard = MessageRegistryClass::$messages['basic']['keyboard'];
+                $text = MessageRegistryClass::$messages['basic']['text'];
+                $queryHandler->firstStartHandler(new Request, $this->chatId, $text, $keyboard);
+                break;
+            case '/помощь':
+                $keyboard = MessageRegistryClass::$messages['basic']['keyboard'];
+                $text = MessageRegistryClass::$messages['basic']['text'];
+                $queryHandler->helpHandler(new Request, $this->chatId, $text, $keyboard);
+                break;
+            case '/ошибки':
+                $keyboard = MessageRegistryClass::getErrorsArray()['keyboard'];
+                $text = MessageRegistryClass::getErrorsArray()['text'];
+                $queryHandler->errorsArrayHandler(new Request, $this->chatId, $text, $keyboard);
+                break;
+            case '/ошибка':
+                $errorObject = MessageRegistryClass::getError($payload);
+                if (!$errorObject) {
+                    $text = sprintf(MessageRegistryClass::$messages['errorDoNotExists']['text'], $payload);
+                    $queryHandler->errorDoNotExists(new Request, $this->chatId, $text);
+                    die();
+                }
+                $keyboard = MessageRegistryClass::$messages['error']['keyboard'];
+                $text = sprintf(MessageRegistryClass::$messages['error']['text'], $payload) . PHP_EOL . $errorObject['text'];
+                $queryHandler->errorHandler(new Request, $this->chatId, $text, $keyboard);
                 break;
             default:
-                $queryHandler->unknownCommand(new Request, $this->chatId);
+                $keyboard = MessageRegistryClass::$messages['basic']['keyboard'];
+                $text = MessageRegistryClass::$messages['basic']['text'];
+                $queryHandler->helpHandler(new Request, $this->chatId, $text, $keyboard);
                 break;
         }
-    }
-    public function pinChatMessage($request, String $messageId = null) {
-        if ($messageId) {
-            $request->set('pinChatMessage', ['chat_id' => $this->chatId, 'message_id' => $messageId]);
-            $request->send();
-            return true;
-        }
-        return false;
-    }
-    public function sendMessageWithKeyboard($request, String $text = null, Array $keyboard = null) {
-        if ($text && $keyboard) {
-            $replyKeyboardMarkup = json_encode([
-                'keyboard' => $keyboard
-            ]);
-            $request->set('sendMessage', [
-                'chat_id' => $this->chatId,
-                'text' => $text,
-                'reply_markup' => $replyKeyboardMarkup
-            ]);
-            $request->send();
-            return true;
-        }
-        return false;
-    }
-    public function sendMessageWithInlineKeyboard($request, String $text = null, Array $keyboard = null) {
-        if ($text && $keyboard) {
-            $replyKeyboardMarkup = json_encode([
-                'inline_keyboard' => $keyboard
-            ]);
-            $request->set('sendMessage', [
-                'chat_id' => $this->chatId,
-                'text' => $text,
-                'reply_markup' => $replyKeyboardMarkup
-            ]);
-            $request->send();
-            return true;
-        }
-        return false;
     }
 }
 

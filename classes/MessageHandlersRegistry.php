@@ -1,24 +1,60 @@
 <?php
 class MessageHandlersRegistry {
-    public function handleErrorInfoCommand($request, String $chatId, String $text) {
-        $errorNo = explode(' ', $text)[1];
-        if (isset($errorNo)) {
-            $errorData = ErrorRegistryClass::get($errorNo);
-            if($errorData === false) {
-                $request->set('sendMessage', ['chat_id' => $chatId, 'text' => 'Неизвестная ошибка']);
-                $request->send();
-                return false;
-            }
-            $request->set('sendMessage', ['chat_id' => $chatId, 'text' => $errorData['errorText']]);
-            $request->send();
-            return true;
-        }
-        $request->set('sendMessage', ['chat_id' => $chatId, 'text' => 'Укажите ошибку, например: "/ошибка 10"']);
+    public function errorsArrayHandler($request, String $chatId, String $text, Array $keyboard) {
+        $request->set('sendMessage', [
+            'chat_id' => $chatId,
+            'text' => $text,
+            'parse_mode' => 'HTML',
+            'reply_markup' => json_encode([
+                'resize_keyboard' => true,
+                'inline_keyboard' => $keyboard
+            ])
+        ]);
         $request->send();
-        return false;
+        return true;
     }
-    public function unknownCommand($request, String $chatId) {
-        $request->set('sendMessage', ['chat_id' => $chatId, 'text' => 'Неизвестная команда']);
+    public function errorHandler($request, String $chatId, String $text, Array $keyboard) {
+        $request->set('sendMessage', [
+            'chat_id' => $chatId,
+            'text' => $text,
+            'parse_mode' => 'HTML',
+            'reply_markup' => json_encode([
+                'inline_keyboard' => $keyboard
+            ])
+        ]);
+        $request->send();
+        return true;
+    }
+    public function errorDoNotExists($request, String $chatId, String $text) {
+        $request->set('sendMessage', [
+            'chat_id' => $chatId,
+            'text' => $text,
+            'parse_mode' => 'HTML',
+        ]);
+        $request->send();
+    }
+    public function firstStartHandler($request, String $chatId, String $text, Array $keyboard) {
+        $request->set('sendMessage', [
+            'chat_id' => $chatId,
+            'text' => $text,
+            'parse_mode' => 'HTML',
+            'reply_markup' => json_encode([
+                'resize_keyboard' => true,
+                'keyboard' => $keyboard
+            ])
+        ]);
+        $request->send();
+    }
+    public function helpHandler($request, String $chatId, String $text, Array $keyboard) {
+        $request->set('sendMessage', [
+            'chat_id' => $chatId,
+            'text' => $text,
+            'parse_mode' => 'HTML',
+            'reply_markup' => json_encode([
+                'resize_keyboard' => true,
+                'keyboard' => $keyboard
+            ])
+        ]);
         $request->send();
     }
 }

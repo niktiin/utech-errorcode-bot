@@ -24,7 +24,7 @@ class Request {
         $responce = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if ($httpcode != '200') {
-            throw new Exception('{"text": "Telegram Bot API return server error!"}');
+            throw new Exception('{"text": "Telegram Bot API return server error!", "httpcode": ' . $httpcode . ', "responce": "' . $responce . '"}');
         }
         curl_close($ch);
         return $responce;
