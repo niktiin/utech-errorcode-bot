@@ -2,7 +2,7 @@
 
 Телеграм бот для обучения новых сотрудников ремонту самокатов _Ninebot_. Актуальные модели: _Max Plus, Max Plus X, SL 90L, G30_
 
-![Gif Telegram bot screen](https://i.ibb.co/61XGj7F/ezgif-4-4de2d0a4b1.gif)
+<img src="https://i.ibb.co/61XGj7F/ezgif-4-4de2d0a4b1.gif" alt="My Project GIF" width="500" height="600">
 
 ## FAQ
 
