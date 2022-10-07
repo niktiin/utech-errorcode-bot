@@ -18,23 +18,25 @@ class MessageRegistryClass {
         ],
         'errorsArray' => [
             'keyboard' => [],
-            'text' => 'Ошибки для моделей: G30, Max Plus, Max Plus X. Основные неисправности и способы их решения.'
+            'text' => '⚠ Ошибки для моделей: G30, Max Plus, Max Plus X. Выберете код ошибки из меню или введите вручную:'
         ],
         'errorsArrayHideKeyboard' => [
             'keyboard' => [
-                [['text' => 'Показать ошибки...', 'callback_data' => '{"route": "route_showErrorsArray"}']]
+                [['text' => 'Показать ошибки...']]
             ],
             'text' => 'Ошибки для моделей: G30, Max Plus, Max Plus X. Основные неисправности и способы их решения.'
         ],
         'error' => [
             'keyboard' => [
-                [['text' => 'Способы решения', 'callback_data' => '{"route": "route_getSolutions", "code": "%s"}']],
-                [['text' => 'Что нужно для ремонта', 'callback_data' => '{"route": "route_getComponents", "code": "%s"}']]
+                [['text' => 'Способы решения']]
             ],
             'text' => 'Описание ошибки <code>#%s</code>:'
         ],
+        'errorCodeDoNotExists' => [
+            'text' => 'Пожалуйста после команды "<code>/ошибка</code>" ввидите код ошибки, например: "<code>/ошибка 10</code>"'
+        ],
         'errorDoNotExists' => [
-            'text' => 'Ошибка <code>#%s</code> не найдена!'
+            'text' => 'Ошибка <code>#%s</code> не существует, чтобы посмотреть список ошибок ввидите — "<code>/ошибки</code>", или воспользуйтесь меню'
         ]
     ];
 
@@ -45,26 +47,6 @@ class MessageRegistryClass {
         }
 
         return self::$messages[$key];
-    }
-    final public static function getErrorsArray() {
-        foreach (ErrorRegistryClass::$errors as $key => $value) {
-            array_push(self::$messages['errorsArray']['keyboard'], [[
-                'text' => "$key — $value[desc]",
-                'callback_data' => '{"route": "route_getError", "code": "' . $key . '"}'
-            ]]);
-        }
-        array_push(self::$messages['errorsArray']['keyboard'], [[
-            'text' => "Скрыть ошибки...",
-            'callback_data' => '{"route": "route_hideErrorsArray"}'
-        ]]);
-        return  self::$messages['errorsArray'];
-    }
-    final public static function getError(String $code) {
-        if(array_key_exists($code, ErrorRegistryClass::$errors)) {
-            return  ErrorRegistryClass::$errors[$code];
-        } else {
-            return false;
-        }
     }
     final public static function getErrorKeyboard(String $code) {
         self::$messages['error']['keyboard'][0][0]['callback_data'] = sprintf(self::$messages['error']['keyboard'][0][0]['callback_data'], $code);

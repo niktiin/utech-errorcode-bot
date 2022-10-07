@@ -4,18 +4,12 @@ class Request {
     private $url;
     private $method;
     private static $bot_api_key = '5717042067:AAGtinZODp2tYsLfREPP5bIB-4txC2LqD3g';
-    public function __construct(String $method = '', Array $options = []) {
-        $this->url = 'https://api.telegram.org/bot' . self::$bot_api_key . '/' . $method;
+    public function __construct(String $method, Array $options) {
+        $this->method = $method;
         $this->options = $options;
     }
-    public function echo() {
-        print_r(json_encode(['url'=> $this->url, 'options'=> $this->options]));
-    }
-    public function set(String $method = '', Array $options = []) {
-        $this->url = 'https://api.telegram.org/bot' . self::$bot_api_key . '/' . $method;
-        $this->options = $options;
-    }
-    public function send() {
+    public function __invoke() {
+        $this->url = 'https://api.telegram.org/bot' . self::$bot_api_key . '/' . $this->method;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
